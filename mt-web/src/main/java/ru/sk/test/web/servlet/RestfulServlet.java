@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
 import ru.sk.test.mt.core.MoneyTransferService;
+import ru.sk.test.mt.core.dto.OperationResultDto;
 import ru.sk.test.mt.data.dao.UserDAO;
 import ru.sk.test.mt.data.entity.Account;
 import ru.sk.test.mt.data.entity.common.gson.AnnotationExcludeStrategy;
@@ -24,11 +25,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
+import java.math.BigDecimal;
 
 /**
  * Created by Sergey_Karnaukhov on 20.03.2017
  */
-@Path("home")
+@Path("get")
 public class RestfulServlet {
 
     private static final Logger logger = Logger.getLogger(RestfulServlet.class);
@@ -36,12 +38,41 @@ public class RestfulServlet {
     @Inject
     private MoneyTransferService moneyTransferService;
 
+    private final Gson gson = new Gson();
+
     @GET
-    @Path("hello")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String helloWorld() {
-        logger.debug("Get request processing...");
-        return "Hello, world!";
+    @Path("transfer/from/{fromUserId}/account/{fromAccountId}/to/{toUserId}/account/{toAccountId}/money/{amount}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String transfer(
+            @PathParam("fromUserId") Long fromUserId, @PathParam("fromAccountId") Long fromAccountId,
+            @PathParam("toUserId") Long toUserId, @PathParam("toAccountId") Long toAccountId,
+            @PathParam("amount") BigDecimal amount
+    ) {
+        OperationResultDto result;
+        try {
+            result = moneyTransferService.transfer(fromUserId, fromAccountId, toUserId, toAccountId, amount);
+        } catch (Exception e) {
+            String message = "Exception occurred while transfering money";
+            logger.error(message, e);
+            result = new OperationResultDto(false, message);
+        }
+        return gson.toJson(result);
+    }
+
+    @GET
+    @Path("person/{id}/accountBalance/{accountNumber}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String accountBalance(@PathParam("id") Long personId, @PathParam("accountNumber") Long accountNumber) {
+        logger.debug("Get account balance processing...");
+        OperationResultDto result;
+        try {
+            result = moneyTransferService.getAccountBalance(personId, accountNumber);
+        } catch (Exception e) {
+            String message = "Exception occurred while getting account balance";
+            logger.error(message, e);
+            result = new OperationResultDto(false, message);
+        }
+        return gson.toJson(result);
     }
 
     @GET

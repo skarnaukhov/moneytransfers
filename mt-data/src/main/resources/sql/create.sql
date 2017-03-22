@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS PERSON;
+DROP TABLE IF EXISTS ACCOUNT;
+
 CREATE TABLE PERSON (
   PERSON_ID             NUMBER                    NOT NULL,
   LOGIN                 VARCHAR2(120)             NOT NULL,
