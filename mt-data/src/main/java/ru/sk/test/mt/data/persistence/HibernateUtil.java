@@ -8,7 +8,7 @@ import org.hibernate.cfg.Configuration;
  * Created by Sergey_Karnaukhov on 21.03.2017
  */
 public class HibernateUtil {
-    SessionFactory sessionFactory = new Configuration().configure()
+    private SessionFactory sessionFactory = new Configuration().configure()
             .buildSessionFactory();
 
     public Session getNewSession() {

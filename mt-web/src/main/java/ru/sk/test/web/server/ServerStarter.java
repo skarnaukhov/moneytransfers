@@ -4,10 +4,9 @@ import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import ru.sk.test.web.Runner;
-import ru.sk.test.web.servlet.RestfulServlet;
+import ru.sk.test.web.servlet.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,13 +42,13 @@ public class ServerStarter {
         jerseyServlet.setInitOrder(0);
         Map<String ,String> initParams = new HashMap<>();
         initParams.put("jersey.config.server.provider.classnames",
-                RestfulServlet.class.getCanonicalName());
+                RestController.class.getCanonicalName());
         initParams.put("javax.ws.rs.Application",
                 ApplicationConfig.class.getCanonicalName());
         jerseyServlet.setInitParameters(initParams);
         /*jerseyServlet.setInitParameter(
                 "jersey.config.server.provider.classnames",
-                RestfulServlet.class.getCanonicalName());
+                RestController.class.getCanonicalName());
 
         ServletHolder diServlet = context.addServlet(ServletContainer.class, "*//*");
         diServlet.setInitOrder(1);

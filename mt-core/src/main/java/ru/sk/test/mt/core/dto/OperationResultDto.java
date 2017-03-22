@@ -24,4 +24,12 @@ public class OperationResultDto {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return "OperationResultDto{" +
+                "success=" + success +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

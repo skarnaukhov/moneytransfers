@@ -15,7 +15,6 @@ import java.util.Currency;
 @Table(name = "ACCOUNT")
 public class Account extends AbstractEntity<Long> {
 
-    private Long number;
     @Embedded
     private String currency;
     private BigDecimal balance;
@@ -30,7 +29,7 @@ public class Account extends AbstractEntity<Long> {
     }
 
     @Id
-    @Column(name = "ACCOUNT_ID", insertable = false, updatable = false)
+    @Column(name = "NUMBER", insertable = false, updatable = false)
     @Override
     public Long getId() {
         return super.getId();
@@ -39,15 +38,6 @@ public class Account extends AbstractEntity<Long> {
     @Override
     protected void setId(Long aLong) {
         super.setId(aLong);
-    }
-
-    @Column(name = "NUMBER")
-    public Long getNumber() {
-        return number;
-    }
-
-    public void setNumber(Long number) {
-        this.number = number;
     }
 
     @Column(name = "CURRENCY")

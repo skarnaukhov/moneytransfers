@@ -4,7 +4,6 @@ import jersey.repackaged.com.google.common.base.Preconditions;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -58,14 +57,6 @@ public class StripedLock {
         return locks[new Long(id).intValue() & (locks.length - 1)];
     }
 
-    private static final Comparator<? super NumberedLock> CONSISTENT_COMPARATOR = new Comparator<NumberedLock>() {
-        @Override
-        public int compare(NumberedLock o1, NumberedLock o2) {
-            return new Long(o1.id - o2.id).intValue();
-        }
-    };
-
-
     public void lockIds(@NotNull long[] ids) {
         Preconditions.checkNotNull(ids);
         NumberedLock[] neededLocks = getOrderedLocks(ids);
@@ -85,19 +76,7 @@ public class StripedLock {
         for (int i = 0; i < ids.length; i++) {
             neededLocks[i] = getLock(i);
         }
-        Arrays.sort(neededLocks, CONSISTENT_COMPARATOR);
+        Arrays.sort(neededLocks, (o1, o2) -> Long.valueOf(o1.id).compareTo(o2.id));
         return neededLocks;
     }
 }
- /*   // ...
-    public void transfer(StripedLock lock, Account from, Account to) {
-        int[] accountIds = new int[]{from.getId(), to.getId()};
-        lock.lockIds(accountIds);
-        try {
-            // profit!
-        } finally {
-            lock.unlockIds(accountIds);
-        }
-    }
-*/
-

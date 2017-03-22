@@ -15,7 +15,12 @@
         <module>mt-web</module>
     </modules>
 
+    <properties>
+        <mt.jetty.version>9.2.14.v20151106</mt.jetty.version>
+    </properties>
+
     <build>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -60,6 +65,26 @@
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>RELEASE</version>
+            </dependency>
+
+
+            <!--TESTS-->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>RELEASE</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>RELEASE</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+                <artifactId>jersey-test-framework-provider-jetty</artifactId>
+                <version>LATEST</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

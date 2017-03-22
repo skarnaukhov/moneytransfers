@@ -4,13 +4,9 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import ru.sk.test.mt.data.entity.Account;
 import ru.sk.test.mt.data.entity.Person;
-import ru.sk.test.mt.data.persistence.EntityManagerFactory;
 import ru.sk.test.mt.data.persistence.HibernateUtil;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
 
 /**
  * Created by Sergey_Karnaukhov on 20.03.2017
