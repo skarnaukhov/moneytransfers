@@ -28,6 +28,7 @@
 
         <mapping class="ru.sk.test.mt.data.entity.Person"/>
         <mapping class="ru.sk.test.mt.data.entity.Account"/>
+        <mapping class="ru.sk.test.mt.data.entity.ExchangeRate"/>
 
     </session-factory>
 

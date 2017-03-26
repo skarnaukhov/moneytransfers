@@ -73,9 +73,9 @@ public class RestfulServiceTest extends JerseyTest {
 
     private List<Callable<OperationResultDto>> getDepositRequests() {
         final List<Callable<OperationResultDto>> depositRequests = new ArrayList<>();
-        depositRequests.add(() -> executeGetRequest("deposit/to/40807810400134/amount/100.25"));
-        depositRequests.add(() -> executeGetRequest("deposit/to/40807810402352/amount/500.75"));
-        depositRequests.add(() -> executeGetRequest("deposit/to/40807810407547/amount/200.50"));
+        depositRequests.add(() -> executeGetRequest("deposit/40807810400134/amount/100.25"));
+        depositRequests.add(() -> executeGetRequest("deposit/40807810402352/amount/500.75"));
+        depositRequests.add(() -> executeGetRequest("deposit/40807810407547/amount/200.50"));
         return depositRequests;
     }
 

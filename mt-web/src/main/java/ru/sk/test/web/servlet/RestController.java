@@ -46,7 +46,7 @@ public class RestController {
     }
 
     @GET
-    @Path("deposit/to/{toAccountId}/amount/{amount}")
+    @Path("deposit/{toAccountId}/amount/{amount}")
     @Produces(MediaType.APPLICATION_JSON)
     public String deposit(
             @PathParam("toAccountId") Long toAccountId,
@@ -64,7 +64,7 @@ public class RestController {
     }
 
     @GET
-    @Path("withdraw/from/{fromAccountId}/amount/{amount}")
+    @Path("withdraw/{fromAccountId}/amount/{amount}")
     @Produces(MediaType.APPLICATION_JSON)
     public String withdraw(
             @PathParam("fromAccountId") Long fromAccountId,
@@ -95,19 +95,6 @@ public class RestController {
             result = new OperationResultDto(false, message);
         }
         return gson.toJson(result);
-    }
-
-    @GET
-    @Path("person/{id}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getPersonById(@PathParam("id") String idParam) {
-        Long id;
-        try {
-            id = Long.parseLong(idParam);
-        } catch (NumberFormatException nfe) {
-            return "ID is not valid number";
-        }
-        return moneyTransferService.getPersonById(id).toString();
     }
 }
 

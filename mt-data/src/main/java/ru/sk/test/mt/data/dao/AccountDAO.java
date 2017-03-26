@@ -1,25 +1,16 @@
 package ru.sk.test.mt.data.dao;
 
-import org.hibernate.Session;
 import ru.sk.test.mt.data.entity.Account;
-import ru.sk.test.mt.data.persistence.HibernateUtil;
-
-import javax.inject.Inject;
+import ru.sk.test.mt.data.entity.ExchangeRate;
 
 /**
- * Created by Sergey_Karnaukhov on 21.03.2017
+ * Created by Sergey_Karnaukhov on 25.03.2017
  */
-public class AccountDAO {
+public interface AccountDAO {
 
-    @Inject
-    private HibernateUtil hibernateUtil;
+    Account getAccountById(long accountNumber);
 
-    public Account getAccountById(long accountNumber) {
-        final Session session = hibernateUtil.getNewSession();
-        session.getTransaction().begin();
-        final Account account = session.get(Account.class, accountNumber);
-        session.getTransaction().commit();
-        session.close();
-        return account;
-    }
+    ExchangeRate getExchangeRate(String currencyCode);
+
+    void update(Account account);
 }
