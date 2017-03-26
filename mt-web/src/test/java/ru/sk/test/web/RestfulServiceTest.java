@@ -5,9 +5,9 @@ import org.apache.log4j.Logger;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
 import org.junit.Test;
-import ru.sk.test.mt.core.dto.OperationResultDto;
+import ru.sk.test.mt.core.dto.ExecutionResult;
 import ru.sk.test.web.server.ApplicationConfig;
-import ru.sk.test.web.servlet.RestController;
+import ru.sk.test.web.controller.RestController;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
@@ -39,15 +39,15 @@ public class RestfulServiceTest extends JerseyTest {
 
     @Test
     public void testMoneyTransferParallel() {
-        final List<Callable<OperationResultDto>> depositRequests = getDepositRequests();
-        final List<Callable<OperationResultDto>> transferRequests = getTransferRequests();
+        final List<Callable<ExecutionResult>> depositRequests = getDepositRequests();
+        final List<Callable<ExecutionResult>> transferRequests = getTransferRequests();
         try {
             final ExecutorService executor = Executors.newFixedThreadPool(10);
             executor.invokeAll(depositRequests);
             executor.invokeAll(transferRequests);
-            OperationResultDto result1Dto = executor.submit(() -> executeGetRequest("accountBalance/40807810400134")).get();
-            OperationResultDto result2Dto = executor.submit(() -> executeGetRequest("accountBalance/40807810402352")).get();
-            OperationResultDto result3Dto = executor.submit(() -> executeGetRequest("accountBalance/40807810407547")).get();
+            ExecutionResult result1Dto = executor.submit(() -> executeGetRequest("accountBalance/40807810400134")).get();
+            ExecutionResult result2Dto = executor.submit(() -> executeGetRequest("accountBalance/40807810402352")).get();
+            ExecutionResult result3Dto = executor.submit(() -> executeGetRequest("accountBalance/40807810407547")).get();
             assertEquals(result1Dto.getMessage().toUpperCase(),("USD 135.00"));
             assertEquals(result2Dto.getMessage().toUpperCase(),("USD 445.75"));
             assertEquals(result3Dto.getMessage().toUpperCase(),("USD 220.75"));
@@ -56,8 +56,8 @@ public class RestfulServiceTest extends JerseyTest {
         }
     }
 
-    private List<Callable<OperationResultDto>> getTransferRequests() {
-        final List<Callable<OperationResultDto>> transferRequests = new ArrayList<>();
+    private List<Callable<ExecutionResult>> getTransferRequests() {
+        final List<Callable<ExecutionResult>> transferRequests = new ArrayList<>();
         transferRequests.add(() -> executeGetRequest("transfer/from/40807810400134/to/40807810402352/amount/10.25"));
         transferRequests.add(() -> executeGetRequest("transfer/from/40807810402352/to/40807810400134/amount/20"));
         transferRequests.add(() -> executeGetRequest("transfer/from/40807810407547/to/40807810400134/amount/5.50"));
@@ -71,20 +71,20 @@ public class RestfulServiceTest extends JerseyTest {
         return transferRequests;
     }
 
-    private List<Callable<OperationResultDto>> getDepositRequests() {
-        final List<Callable<OperationResultDto>> depositRequests = new ArrayList<>();
+    private List<Callable<ExecutionResult>> getDepositRequests() {
+        final List<Callable<ExecutionResult>> depositRequests = new ArrayList<>();
         depositRequests.add(() -> executeGetRequest("deposit/40807810400134/amount/100.25"));
         depositRequests.add(() -> executeGetRequest("deposit/40807810402352/amount/500.75"));
         depositRequests.add(() -> executeGetRequest("deposit/40807810407547/amount/200.50"));
         return depositRequests;
     }
 
-    private OperationResultDto executeGetRequest(String url) {
+    private ExecutionResult executeGetRequest(String url) {
         logger.info("Request is being sent: " + url);
         Response output = target(url).request().get();
         if (output.getStatus() == 200) {
             String readEntity = output.readEntity(String.class);
-            return gson.fromJson(readEntity, OperationResultDto.class);
+            return gson.fromJson(readEntity, ExecutionResult.class);
         } else {
             throw new IllegalStateException("Code is different");
         }

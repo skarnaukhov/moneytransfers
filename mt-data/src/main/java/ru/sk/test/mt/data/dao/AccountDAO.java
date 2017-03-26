@@ -10,7 +10,5 @@ public interface AccountDAO {
 
     Account getAccountById(long accountNumber);
 
-    ExchangeRate getExchangeRate(String currencyCode);
-
     void update(Account account);
 }

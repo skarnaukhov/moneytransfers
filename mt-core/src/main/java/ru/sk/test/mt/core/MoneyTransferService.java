@@ -2,21 +2,20 @@ package ru.sk.test.mt.core;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Transaction;
-import ru.sk.test.mt.core.dto.OperationResultDto;
+import ru.sk.test.mt.core.dto.ExecutionResult;
 import ru.sk.test.mt.core.lock.StripedLock;
 import ru.sk.test.mt.data.dao.AccountDAO;
 import ru.sk.test.mt.data.entity.Account;
-import ru.sk.test.mt.data.entity.ExchangeRate;
 import ru.sk.test.mt.data.persistence.HibernateUtil;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.util.Currency;
+import java.util.Arrays;
 
 /**
  * Created by Sergey_Karnaukhov on 21.03.2017
  */
-public class MoneyTransferService {
+public class MoneyTransferService extends AbstractExecutionResponse {
 
     private static final Logger logger = Logger.getLogger(MoneyTransferService.class);
     private final StripedLock lock;
@@ -35,105 +34,94 @@ public class MoneyTransferService {
     @Inject
     private AccountService accountService;
 
-    public OperationResultDto getAccountBalance(long accNumber) {
+    public ExecutionResult getAccountBalance(long accNumber) {
         long[] accountIds = new long[]{accNumber};
-        lock.lockIds(accountIds);
-        final Account account = accountDAO.getAccountById(accNumber);
-        lock.unlockIds(accountIds);
-        if (account == null) {
-            return new OperationResultDto(false, "Could not find an account with such params");
+        acquireLock(accountIds);
+        final Account account;
+        try {
+            account = accountDAO.getAccountById(accNumber);
+            return success(account.getCurrency().getCurrencyCode() + " " + account.getBalance());
+        } catch (Exception e) {
+            return processExceptionAndReturnDTO(e, "Error occurred while reading account.");
+        } finally {
+            lock.unlockIds(accountIds);
         }
-        return new OperationResultDto(true, account.getCurrency().getCurrencyCode() + " " + account.getBalance());
     }
 
-    public OperationResultDto transfer(long fromAccId, long toAccId, BigDecimal amount) {
+    public ExecutionResult transfer(long fromAccId, long toAccId, BigDecimal amount) {
+        if (fromAccId == toAccId) {
+            return success();
+        }
+
         long[] accountIds = new long[]{fromAccId, toAccId};
-        long timeStamp = System.currentTimeMillis();
-        logger.info("Acquiring lock...");
-        lock.lockIds(accountIds);
-        logger.info("Lock acquired... time spent: " + (System.currentTimeMillis() - timeStamp));
+        acquireLock(accountIds);
         final Transaction transaction = hibernateUtil.beginTransaction();
         final Account fromAccount = accountDAO.getAccountById(fromAccId);
         final Account toAccount = accountDAO.getAccountById(toAccId);
         try {
             accountService.withdraw(fromAccount, amount);
             if (!fromAccount.getCurrency().equals(toAccount.getCurrency())) {
-                amount = exchange(fromAccount.getCurrency(), toAccount.getCurrency(), amount);
+                amount = accountService.exchange(fromAccount.getCurrency(), toAccount.getCurrency(), amount);
             }
             accountService.deposit(toAccount, amount);
             accountDAO.update(fromAccount);
             accountDAO.update(toAccount);
             transaction.commit();
-            return new OperationResultDto(true);
+            return success();
         } catch (Exception e) {
-            String message = "Error occurred while acquiring account data";
-            logger.error(message, e);
             transaction.rollback();
-            return new OperationResultDto(false, message + ": " + e.getMessage());
+            return processExceptionAndReturnDTO(e, "Error occurred while acquiring account data.");
         } finally {
             lock.unlockIds(accountIds);
         }
     }
 
-    private BigDecimal exchange(Currency fromCurrency, Currency toCurrency, BigDecimal amount) {
-        ExchangeRate rate;
-        if (fromCurrency.equals(ExchangeRate.BASE_CURRENCY)) {
-             rate = accountDAO.getExchangeRate(toCurrency.getCurrencyCode());
-            return amount.multiply(rate.getRate());
-        } else {
-            if (toCurrency.equals(ExchangeRate.BASE_CURRENCY)) {
-                rate = accountDAO.getExchangeRate(fromCurrency.getCurrencyCode());
-                return amount.divide(rate.getRate(), BigDecimal.ROUND_DOWN);
-            } else {
-                throw new IllegalArgumentException("Currency exchange without USD is not yet supported");
-            }
-        }
-    }
-
-    public OperationResultDto withdraw(long fromAccId, BigDecimal amount) {
+    public ExecutionResult withdraw(long fromAccId, BigDecimal amount) {
         long[] accountIds = new long[]{fromAccId};
-        long timeStamp = System.currentTimeMillis();
-        logger.info("Acquiring lock...");
-        lock.lockIds(accountIds);
-        logger.info("Lock acquired... time spent: " + (System.currentTimeMillis() - timeStamp));
+        acquireLock(accountIds);
         final Transaction transaction = hibernateUtil.beginTransaction();
         final Account fromAccount = accountDAO.getAccountById(fromAccId);
         try {
             accountService.withdraw(fromAccount, amount);
             accountDAO.update(fromAccount);
             transaction.commit();
-            return new OperationResultDto(true);
+            return success();
         } catch (Exception e) {
-            String message = "Error occurred while acquiring account data";
-            logger.error(message, e);
             transaction.rollback();
-            return new OperationResultDto(false, message + ": " + e.getMessage());
+            return processExceptionAndReturnDTO(e, "Error occurred while acquiring account data");
         } finally {
             lock.unlockIds(accountIds);
         }
     }
 
-    public OperationResultDto deposit(long toAccId, BigDecimal amount) {
+    public ExecutionResult deposit(long toAccId, BigDecimal amount) {
         long[] accountIds = new long[]{toAccId};
-        long timeStamp = System.currentTimeMillis();
-        logger.info("Acquiring lock...");
-        lock.lockIds(accountIds);
-        logger.info("Lock acquired... time spent: " + (System.currentTimeMillis() - timeStamp));
+        acquireLock(accountIds);
         final Transaction transaction = hibernateUtil.beginTransaction();
         final Account toAccount = accountDAO.getAccountById(toAccId);
         try {
             accountService.deposit(toAccount, amount);
             accountDAO.update(toAccount);
             transaction.commit();
-            return new OperationResultDto(true);
+            return success();
         } catch (Exception e) {
-            String message = "Error occurred while acquiring account data";
-            logger.error(message, e);
             transaction.rollback();
-            return new OperationResultDto(false, message + ": " + e.getMessage());
+            return processExceptionAndReturnDTO(e, "Error occurred while acquiring account data");
         } finally {
             lock.unlockIds(accountIds);
         }
+    }
+
+    private void acquireLock(long[] accountIds) {
+        long timeStamp = System.currentTimeMillis();
+        logger.info("Acquiring lock for ids: " + Arrays.toString(accountIds));
+        lock.lockIds(accountIds);
+        logger.info("Lock acquired... time spent: " + (System.currentTimeMillis() - timeStamp));
+    }
+
+    private ExecutionResult processExceptionAndReturnDTO(Exception exception, String message) {
+        logger.error(message, exception);
+        return failure(message + " " + exception.getMessage());
     }
 
 

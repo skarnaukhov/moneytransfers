@@ -5,7 +5,9 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import ru.sk.test.mt.core.AccountService;
 import ru.sk.test.mt.core.MoneyTransferService;
 import ru.sk.test.mt.data.dao.AccountDAO;
-import ru.sk.test.mt.data.dao.H2AccountDAO;
+import ru.sk.test.mt.data.dao.ExchangeRateDAO;
+import ru.sk.test.mt.data.dao.h2.H2AccountDAO;
+import ru.sk.test.mt.data.dao.h2.H2ExchangeRateDAO;
 import ru.sk.test.mt.data.persistence.HibernateUtil;
 
 import javax.inject.Singleton;
@@ -18,6 +20,7 @@ public class SingletonBinder extends AbstractBinder {
     protected void configure() {
         bind(HibernateUtil.class).to(HibernateUtil.class).in(Immediate.class);
         bind(H2AccountDAO.class).to(AccountDAO.class).in(Singleton.class);
+        bind(H2ExchangeRateDAO.class).to(ExchangeRateDAO.class).in(Singleton.class);
         bind(MoneyTransferService.class).to(MoneyTransferService.class).in(Singleton.class);
         bind(AccountService.class).to(AccountService.class).in(Singleton.class);
     }

@@ -15,7 +15,7 @@ public class Runner {
         try {
             ServerStarter.startServer();
         } catch (Exception e) {
-            logger.error("Error while starting the DB", e);
+            logger.error("Error while starting the API server", e);
             ServerStarter.stopServer();
         }
     }

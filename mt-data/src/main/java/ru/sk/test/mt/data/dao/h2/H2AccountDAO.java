@@ -1,6 +1,7 @@
-package ru.sk.test.mt.data.dao;
+package ru.sk.test.mt.data.dao.h2;
 
 import org.hibernate.Session;
+import ru.sk.test.mt.data.dao.AccountDAO;
 import ru.sk.test.mt.data.entity.Account;
 import ru.sk.test.mt.data.entity.ExchangeRate;
 import ru.sk.test.mt.data.persistence.HibernateUtil;
@@ -22,10 +23,6 @@ public class H2AccountDAO implements AccountDAO {
 
     public Account getAccountById(long accountNumber) {
         return h2Session.get(Account.class, accountNumber);
-    }
-
-    public ExchangeRate getExchangeRate(String currencyCode) {
-        return h2Session.get(ExchangeRate.class, currencyCode);
     }
 
     @Override

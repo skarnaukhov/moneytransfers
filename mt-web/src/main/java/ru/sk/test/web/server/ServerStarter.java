@@ -6,7 +6,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 import ru.sk.test.web.Runner;
-import ru.sk.test.web.servlet.RestController;
+import ru.sk.test.web.controller.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,21 +46,14 @@ public class ServerStarter {
         initParams.put("javax.ws.rs.Application",
                 ApplicationConfig.class.getCanonicalName());
         jerseyServlet.setInitParameters(initParams);
-        /*jerseyServlet.setInitParameter(
-                "jersey.config.server.provider.classnames",
-                RestController.class.getCanonicalName());
-
-        ServletHolder diServlet = context.addServlet(ServletContainer.class, "*//*");
-        diServlet.setInitOrder(1);
-        diServlet.setInitParameter(
-                "javax.ws.rs.Application",
-                ApplicationConfig.class.getCanonicalName());*/
     }
 
     public static void stopServer() {
         try {
-            server.stop();
-            server = null;
+            if (server != null) {
+                server.stop();
+                server = null;
+            }
         } catch (Exception e) {
             logger.error("Error while stopping jetty server", e);
         }
