@@ -2,8 +2,13 @@ package ru.sk.test.mt.core;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Transaction;
+import ru.sk.test.mt.core.dto.ExecutionRequest;
 import ru.sk.test.mt.core.dto.ExecutionResult;
 import ru.sk.test.mt.core.lock.StripedLock;
+import ru.sk.test.mt.core.validation.AbstractValidationService;
+import ru.sk.test.mt.core.validation.DepositRqValidationService;
+import ru.sk.test.mt.core.validation.TransferRqValidationService;
+import ru.sk.test.mt.core.validation.WithdrawRqValidationService;
 import ru.sk.test.mt.data.dao.AccountDAO;
 import ru.sk.test.mt.data.entity.Account;
 import ru.sk.test.mt.data.persistence.HibernateUtil;
@@ -48,17 +53,20 @@ public class MoneyTransferService extends AbstractExecutionResponse {
         }
     }
 
-    public ExecutionResult transfer(long fromAccId, long toAccId, BigDecimal amount) {
-        if (fromAccId == toAccId) {
+    public ExecutionResult transfer(ExecutionRequest executionRequest) {
+        validate(new TransferRqValidationService(executionRequest));
+
+        if (executionRequest.getFromAccountNumber().equals(executionRequest.getToAccountNumber())) {
             return success();
         }
 
-        long[] accountIds = new long[]{fromAccId, toAccId};
+        long[] accountIds = new long[]{executionRequest.getFromAccountNumber(), executionRequest.getToAccountNumber()};
         acquireLock(accountIds);
         final Transaction transaction = hibernateUtil.beginTransaction();
-        final Account fromAccount = accountDAO.getAccountById(fromAccId);
-        final Account toAccount = accountDAO.getAccountById(toAccId);
+        final Account fromAccount = accountDAO.getAccountById(executionRequest.getFromAccountNumber());
+        final Account toAccount = accountDAO.getAccountById(executionRequest.getToAccountNumber());
         try {
+            BigDecimal amount = executionRequest.getAmount();
             accountService.withdraw(fromAccount, amount);
             if (!fromAccount.getCurrency().equals(toAccount.getCurrency())) {
                 amount = accountService.exchange(fromAccount.getCurrency(), toAccount.getCurrency(), amount);
@@ -76,13 +84,15 @@ public class MoneyTransferService extends AbstractExecutionResponse {
         }
     }
 
-    public ExecutionResult withdraw(long fromAccId, BigDecimal amount) {
-        long[] accountIds = new long[]{fromAccId};
+    public ExecutionResult withdraw(ExecutionRequest executionRequest) {
+        validate(new WithdrawRqValidationService(executionRequest));
+
+        long[] accountIds = new long[]{executionRequest.getFromAccountNumber()};
         acquireLock(accountIds);
         final Transaction transaction = hibernateUtil.beginTransaction();
-        final Account fromAccount = accountDAO.getAccountById(fromAccId);
+        final Account fromAccount = accountDAO.getAccountById(executionRequest.getFromAccountNumber());
         try {
-            accountService.withdraw(fromAccount, amount);
+            accountService.withdraw(fromAccount, executionRequest.getAmount());
             accountDAO.update(fromAccount);
             transaction.commit();
             return success();
@@ -94,13 +104,15 @@ public class MoneyTransferService extends AbstractExecutionResponse {
         }
     }
 
-    public ExecutionResult deposit(long toAccId, BigDecimal amount) {
-        long[] accountIds = new long[]{toAccId};
+    public ExecutionResult deposit(ExecutionRequest executionRequest) {
+        validate(new DepositRqValidationService(executionRequest));
+
+        long[] accountIds = new long[]{executionRequest.getToAccountNumber()};
         acquireLock(accountIds);
         final Transaction transaction = hibernateUtil.beginTransaction();
-        final Account toAccount = accountDAO.getAccountById(toAccId);
+        final Account toAccount = accountDAO.getAccountById(executionRequest.getToAccountNumber());
         try {
-            accountService.deposit(toAccount, amount);
+            accountService.deposit(toAccount, executionRequest.getAmount());
             accountDAO.update(toAccount);
             transaction.commit();
             return success();
@@ -122,6 +134,10 @@ public class MoneyTransferService extends AbstractExecutionResponse {
     private ExecutionResult processExceptionAndReturnDTO(Exception exception, String message) {
         logger.error(message, exception);
         return failure(message + " " + exception.getMessage());
+    }
+
+    private void validate(AbstractValidationService validationService) {
+        validationService.validate();
     }
 
 

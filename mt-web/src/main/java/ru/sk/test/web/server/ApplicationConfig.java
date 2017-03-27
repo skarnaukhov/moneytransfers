@@ -13,6 +13,7 @@ public class ApplicationConfig extends ResourceConfig {
     public ApplicationConfig() {
         register(new SingletonBinder());
         register(ImmediateFeature.class);
+//        register(MOXyJsonContextResolver.class);
     }
 
 }

@@ -86,6 +86,7 @@
                 <artifactId>jersey-test-framework-provider-jetty</artifactId>
                 <version>LATEST</version>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 

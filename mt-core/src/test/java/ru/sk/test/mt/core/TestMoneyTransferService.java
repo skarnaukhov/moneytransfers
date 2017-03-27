@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import ru.sk.test.mt.core.dto.ExecutionRequest;
+import ru.sk.test.mt.core.exception.RequestValidationException;
 import ru.sk.test.mt.data.dao.AccountDAO;
 import ru.sk.test.mt.data.entity.Account;
 import ru.sk.test.mt.data.persistence.HibernateUtil;
@@ -57,7 +59,7 @@ public class TestMoneyTransferService {
         Account toAccount = getToAccount();
         when(accountDAO.getAccountById(fromAccountId)).thenReturn(fromAccount);
         when(accountDAO.getAccountById(toAccountId)).thenReturn(toAccount);
-        moneyTransferService.transfer(fromAccountId, toAccountId, fromAccountValue);
+        moneyTransferService.transfer(getTransferExecutionRequest());
 
         verify(accountService).withdraw(fromAccount, fromAccountValue);
         verify(accountService).deposit(toAccount, fromAccountValue);
@@ -71,11 +73,26 @@ public class TestMoneyTransferService {
         when(accountDAO.getAccountById(toAccountId)).thenReturn(toAccount);
         BigDecimal valueAfterExchange = BigDecimal.valueOf(8);
         when(accountService.exchange(USD, GBP, fromAccountValue)).thenReturn(valueAfterExchange);
-        moneyTransferService.transfer(fromAccountId, toAccountId, fromAccountValue);
+        moneyTransferService.transfer(getTransferExecutionRequest());
 
         verify(accountService).withdraw(fromAccount, fromAccountValue);
         verify(accountService).deposit(toAccount, valueAfterExchange);
         verify(accountService).exchange(USD, GBP, fromAccountValue);
+    }
+
+    @Test(expected = RequestValidationException.class)
+    public void testDepositWithIllegalArguments() {
+        moneyTransferService.deposit(new ExecutionRequest());
+    }
+
+    @Test(expected = RequestValidationException.class)
+    public void testWithdrawWithIllegalArguments() {
+        moneyTransferService.withdraw(new ExecutionRequest());
+    }
+
+    @Test(expected = RequestValidationException.class)
+    public void testTransferWithIllegalArguments() {
+        moneyTransferService.transfer(new ExecutionRequest());
     }
 
     private Account getFromAccount() {
@@ -91,6 +108,14 @@ public class TestMoneyTransferService {
         account.setBalance(amount);
         account.setCurrency(currency);
         return account;
+    }
+
+    private ExecutionRequest getTransferExecutionRequest() {
+        ExecutionRequest executionRequest = new ExecutionRequest();
+        executionRequest.setAmount(fromAccountValue);
+        executionRequest.setFromAccountNumber(fromAccountId);
+        executionRequest.setToAccountNumber(toAccountId);
+        return executionRequest;
     }
 
 }
