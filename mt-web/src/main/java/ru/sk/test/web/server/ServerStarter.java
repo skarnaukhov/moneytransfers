@@ -13,19 +13,24 @@ import java.util.Map;
 
 /**
  * Created by Sergey_Karnaukhov on 20.03.2017
+ * Starter for local jetty server
  */
 public class ServerStarter {
 
     private static final Logger logger = Logger.getLogger(Runner.class);
 
     private static Server server;
+    private static final int JETTY_PORT = 7070;
 
+    /**
+     * Starts jetty server for port {@link ServerStarter#JETTY_PORT}
+     */
     public static void startServer() {
         try {
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
             context.setContextPath("/");
 
-            server = new Server(7070);
+            server = new Server(JETTY_PORT);
             server.setHandler(context);
             addRestfulServlet(context);
 
@@ -48,6 +53,9 @@ public class ServerStarter {
         jerseyServlet.setInitParameters(initParams);
     }
 
+    /**
+     * Stops jetty server
+     */
     public static void stopServer() {
         try {
             if (server != null) {

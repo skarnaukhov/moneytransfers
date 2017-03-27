@@ -22,6 +22,11 @@ public class AccountService {
     @Inject
     private ExchangeRateDAO exchangeRateDAO;
 
+    /**
+     * Checks amount is valid and deposits to supplied account
+     * @param account to deposit
+     * @param amount to deposit
+     */
     public void deposit(@NotNull Account account, @NotNull BigDecimal amount) {
         checkPositive(amount, "Not able to deposit negative or zero amount");
 
@@ -30,6 +35,11 @@ public class AccountService {
         account.setBalance(totalValue);
     }
 
+    /**
+     * Checks amount is valid; account has enough fund and withdraws from supplied account
+     * @param account to withdraw
+     * @param amount to withdraw
+     */
     public void withdraw(@NotNull Account account, @NotNull BigDecimal amount) {
         checkPositive(amount, "Not able to withdraw negative or zero amount");
 
@@ -42,6 +52,15 @@ public class AccountService {
         }
     }
 
+    /**
+     * Does conversion based on provided currencies;
+     * Checks current exchange rate for calculations;
+     * Currently supports only from or to USD conversions
+     * @param fromCurrency object of type {@link Currency} as source of conversion
+     * @param toCurrency object of type {@link Currency} as target for conversion
+     * @param amount of money to be converted
+     * @return amount based on conversion result
+     */
     public BigDecimal exchange(@NotNull Currency fromCurrency, @NotNull Currency toCurrency, @NotNull BigDecimal amount) {
         checkPositive(amount, "Not able to exchange negative or zero amount");
         if (fromCurrency.equals(toCurrency)) {

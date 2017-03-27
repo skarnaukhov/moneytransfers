@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * Created by Sergey_Karnaukhov on 20.03.2017
+ * Provides operations for money manipulations
  */
 @Path("")
 public class RestController extends AbstractExecutionResponse {
@@ -24,6 +25,11 @@ public class RestController extends AbstractExecutionResponse {
 
     private final Gson gson = new Gson();
 
+    /**
+     * Transfers money from one account to another based on {@link ExecutionRequest} params
+     * @param executionRequest filled json request
+     * @return JSON result based on {@link ExecutionResult}
+     */
     @POST
     @Path("transfer")
     @Produces(MediaType.APPLICATION_JSON)
@@ -40,6 +46,11 @@ public class RestController extends AbstractExecutionResponse {
         return gson.toJson(result);
     }
 
+    /**
+     * Deposits money to account based on {@link ExecutionRequest} params
+     * @param executionRequest filled json request
+     * @return JSON result based on {@link ExecutionResult}
+     */
     @POST
     @Path("deposit")
     @Produces(MediaType.APPLICATION_JSON)
@@ -58,6 +69,11 @@ public class RestController extends AbstractExecutionResponse {
         return gson.toJson(result);
     }
 
+    /**
+     * Withdraws money from account based on {@link ExecutionRequest} params
+     * @param executionRequest filled json request
+     * @return JSON result based on {@link ExecutionResult}
+     */
     @POST
     @Path("withdraw")
     @Produces(MediaType.APPLICATION_JSON)
@@ -74,6 +90,11 @@ public class RestController extends AbstractExecutionResponse {
         return gson.toJson(result);
     }
 
+    /**
+     * Gets account balance
+     * @param accountNumber for target account
+     * @return JSON result based on {@link ExecutionResult}
+     */
     @GET
     @Path("accountBalance/{accountNumber}")
     @Produces(MediaType.APPLICATION_JSON)

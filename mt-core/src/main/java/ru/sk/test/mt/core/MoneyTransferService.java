@@ -39,6 +39,11 @@ public class MoneyTransferService extends AbstractExecutionResponse {
     @Inject
     private AccountService accountService;
 
+    /**
+     * Gets account balance
+     * @param accNumber for target account
+     * @return {@link ExecutionResult} object with account balance information
+     */
     public ExecutionResult getAccountBalance(long accNumber) {
         long[] accountIds = new long[]{accNumber};
         acquireLock(accountIds);
@@ -53,6 +58,12 @@ public class MoneyTransferService extends AbstractExecutionResponse {
         }
     }
 
+    /**
+     * Transfers money from one account to another based on {@link ExecutionRequest} params
+     * Takes into account the currency of particular account and does exchange based on exchange rate if required
+     * @param executionRequest object that should contain from account number; to account number; value to transfer
+     * @return {@link ExecutionResult} object with result based on execution
+     */
     public ExecutionResult transfer(ExecutionRequest executionRequest) {
         validate(new TransferRqValidationService(executionRequest));
 
@@ -84,6 +95,11 @@ public class MoneyTransferService extends AbstractExecutionResponse {
         }
     }
 
+    /**
+     * Withdraws money from account {@link ExecutionRequest} params
+     * @param executionRequest object that should contain from account number; value to transfer
+     * @return {@link ExecutionResult} object with result based on execution
+     */
     public ExecutionResult withdraw(ExecutionRequest executionRequest) {
         validate(new WithdrawRqValidationService(executionRequest));
 
@@ -104,6 +120,11 @@ public class MoneyTransferService extends AbstractExecutionResponse {
         }
     }
 
+    /**
+     * Deposits money to account {@link ExecutionRequest} params
+     * @param executionRequest object that should contain to account number; value to transfer
+     * @return {@link ExecutionResult} object with result based on execution
+     */
     public ExecutionResult deposit(ExecutionRequest executionRequest) {
         validate(new DepositRqValidationService(executionRequest));
 

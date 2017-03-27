@@ -19,6 +19,7 @@ public class Person extends AbstractEntity<Long> {
     private Set<Account> accounts = new HashSet<>();;
 
     public Person() {
+        //jpa
     }
 
     public Person(Long id) {

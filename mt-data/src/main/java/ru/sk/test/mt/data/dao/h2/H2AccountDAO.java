@@ -22,7 +22,11 @@ public class H2AccountDAO implements AccountDAO {
     }
 
     public Account getAccountById(long accountNumber) {
-        return h2Session.get(Account.class, accountNumber);
+        final Account account = h2Session.get(Account.class, accountNumber);
+        if (account == null) {
+            throw new IllegalArgumentException("Not able to find account with number: " + accountNumber);
+        }
+        return account;
     }
 
     @Override

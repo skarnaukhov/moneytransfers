@@ -7,6 +7,7 @@ import org.hibernate.cfg.Configuration;
 
 /**
  * Created by Sergey_Karnaukhov on 21.03.2017
+ * Class to hold H2 embedded DB session as single instance because of H2 limits
  */
 public class HibernateUtil {
     private SessionFactory sessionFactory = new Configuration().configure()
@@ -14,6 +15,10 @@ public class HibernateUtil {
 
     private volatile Session singleSession;
 
+    /**
+     * Thread safe gets or creates session object
+     * @return single instance {@link Session} object
+     */
     public Session getSession() {
         Session localInstance = singleSession;
         if (localInstance == null) {
@@ -27,6 +32,11 @@ public class HibernateUtil {
         return localInstance;
     }
 
+    /**
+     * @return a Transaction instance
+     *
+     * @see Session#beginTransaction()
+     */
     public Transaction beginTransaction() {
         return getSession().beginTransaction();
     }

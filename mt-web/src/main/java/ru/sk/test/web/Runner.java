@@ -6,6 +6,7 @@ import ru.sk.test.web.server.ServerStarter;
 
 /**
  * Created by Sergey_Karnaukhov on 20.03.2017
+ * Runner class for standalone application
  */
 public class Runner {
 
